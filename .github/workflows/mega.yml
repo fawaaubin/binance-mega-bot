@@ -1,39 +1,12 @@
-name: 🤖 MÉGA Bot Deploy
-on: [workflow_dispatch, push]
 
+name: 🤖 MÉGA Bot Cloud
+on: [workflow_dispatch]
 jobs:
-  deploy:
+  bot:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install deps
-      run: |
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt --quiet
-        else
-          pip install ccxt python-telegram-bot requests ta --quiet
-        fi
-
-    - name: SSH Termux
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd ~/binance-mega-bot || git clone https://github.com/fawaaubin/binance-mega-bot.git ~/binance-mega-bot && cd $_
-          git pull origin main
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt -q
-          else
-            pip install ccxt python-telegram-bot requests ta -q
-          fi
-          mkdir -p logs
-          pkill -f mega_bot || true
-          nohup python mega_bot.py > logs/bot.log 2>&1 &
-          echo "🚀 $(date)" >> logs/restart.log
+      with: python-version: '3.11'
+    - run: pip install ccxt
+    - run: python mega_bot.py
